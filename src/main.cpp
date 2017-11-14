@@ -266,21 +266,21 @@ int main() {
 
                     check_car_s += ((double)prev_path_size*.02*check_speed); // if using previous path value can project s value
 
+                    //Check if we are about to collide next car
+
                     if((check_car_s > car_s)&&((check_car_s - car_s)<30)) {
                         //ref_vel = 29.5; // bring down ref velocity as car is too close
                         too_close = true;
-
-
-
 
                     }
 
                 }
             }
 
-            // bring down ref velocity as car is too close
+            // If we are about to collide, try changing lane
             if(too_close)
             {
+                //Lane chnage if logic if we are in lane 1. We have two options either left turn or right turn
                 if (lane == 1 && lane_change==false)
                 {
                     //check if we can take left lane
@@ -288,7 +288,8 @@ int main() {
                     for (int i =0; i < sensor_fusion.size(); i++)
                     {
                         float d =  sensor_fusion[i][6];
-                        //check left lane
+
+                        //check all vehicle in left lane
                         if(d < 4 && d >0)
                         {
 
@@ -302,18 +303,7 @@ int main() {
                             std::cout << "current_car_s=" << current_car_s << "current_left_check_car_s="<< sensor_fusion[i][5] << endl;
                             std::cout << "lane1-left_lane_change.car_s=" << car_s << " left_check_car_s="<< left_check_car_s << endl;
 
-/*
-                                if ((car_s - left_check_car_s) > 30) {
-                                    std::cout << "lane1-left_lane_change.car_s=" << car_s << " left_check_car_s="
-                                              << left_check_car_s << endl;
-                                    std::cout << "current_car_s=" << current_car_s << "current_left_check_car_s="
-                                              << sensor_fusion[i][5] << endl;
-                                    lane = 0;
-                                    lane_change = true;
-                                    break;
-                                }
-
-*/
+                            //Check if there is any vehicle in the path we are planning to take while changing left lane. Come out of loop if there is any vehicle
                             if((sensor_fusion[i][5] >(current_car_s-10) && sensor_fusion[i][5] <(car_s+30))||((abs(car_s - left_check_car_s) < 30)))
                             {
                                 lane_change = false;
@@ -330,6 +320,7 @@ int main() {
 
 
                     }
+                    //Chnage lane if none of the vehicle  in left lane going to intercept trajectory
                     if(lane_change==true)
                     {
                         lane = 0;
@@ -341,6 +332,7 @@ int main() {
                         for (int i =0; i < sensor_fusion.size(); i++)
                         {
                             float d =  sensor_fusion[i][6];
+                            //check all vehicle in Right lane
                             if(d < 12 && d >8)
                             {
                                 double right_vx = sensor_fusion[i][3];
@@ -349,19 +341,12 @@ int main() {
                                 double right_check_car_s = sensor_fusion[i][5];
 
 
-                                //std::cout<<"right_check_speed"<<right_check_speed<<endl;
+
                                 right_check_car_s += ((double)prev_path_size*.02*right_check_speed);
                                 std::cout<<"lane1-right_lane_change. car_s="<<car_s<<" right_check_car_s="<<right_check_car_s<<endl;
                                 std::cout<<"current_car_s="<<current_car_s<<"current_right_check_car_s="<<sensor_fusion[i][5]<<endl;
-                                /*
-                                if((car_s-right_check_car_s) > 30)
-                                {
-                                    lane = 2;
-                                    lane_change = true;
 
-                                    break;
-                                }*/
-
+                                //Check if there is any vehicle in the path we are planning to take while changing left lane. Come out of loop if there is any vehicle
                                 if((sensor_fusion[i][5] >(current_car_s-10) && sensor_fusion[i][5] <(car_s+30))||((abs(car_s - right_check_car_s) < 30)))
                                 {
                                     lane_change = false;
@@ -375,19 +360,21 @@ int main() {
 
                             }
                         }
+                        //Chnage lane if none of the vehicle  in right lane going to intercept our lane chnage trajectory
                         if(lane_change==true)
                         {
                             lane = 2;
                         }
 
                     }
+                    //if current lane is left most lane which is lane 0
                 }else if(lane == 0 && lane_change==false)
                 {
                     std::cout<<"Trying lane0 to lane 1.  trying right turn.."<<endl;
                     for (int i =0; i < sensor_fusion.size(); i++)
                     {
                         float d =  sensor_fusion[i][6];
-                        //check left lane
+                        //check all vehicles in middle lane
                         if(d < 8 && d >4)
                         {
                             double right_vx = sensor_fusion[i][3];
@@ -398,16 +385,7 @@ int main() {
                             std::cout<<"lane0-right_lane_change. car_s="<<car_s<<" right_check_car_s="<<right_check_car_s<<endl;
                             std::cout<<"current_car_s="<<current_car_s<<"current_right_check_car_s="<<sensor_fusion[i][5]<<endl;
 
-                            /*
-                            if((car_s-right_check_car_s) > 30)
-                            {
-                                lane = 1;
-                                lane_change = true;
-                                std::cout<<"lane0-right_lane_change. car_s="<<car_s<<" right_check_car_s="<<right_check_car_s<<endl;
-                                std::cout<<"current_car_s="<<current_car_s<<"current_right_check_car_s="<<sensor_fusion[i][5]<<endl;
-                                break;
-                            }*/
-
+                            //Check if there is any vehicle in the path we are planning to take while changing middle lane. Come out of loop if there is any
                             if((sensor_fusion[i][5] >(current_car_s-10) && sensor_fusion[i][5] <(car_s+30))||((abs(car_s - right_check_car_s) < 30)))
                             {
                                 lane_change = false;
@@ -426,14 +404,14 @@ int main() {
                         lane = 1;
                     }
 
-
+                    //if current lane is right most lane which is lane 2
                 }else if(lane == 2 && lane_change==false )
                 {
                     std::cout<<"Trying lane2 to lane 1.  trying left turn.."<<endl;
                     for (int i =0; i < sensor_fusion.size(); i++)
                     {
                         float d =  sensor_fusion[i][6];
-                        //check left lane
+                        //check all vehicles in middle lane
                         if(d < 8 && d >4)
                         {
                             double left_vx = sensor_fusion[i][3];
@@ -444,16 +422,7 @@ int main() {
                             std::cout<<"lane2-left_lane_change. car_s="<<car_s<<" left_check_car_s="<<left_check_car_s<<endl;
                             std::cout<<"current_car_s="<<current_car_s<<"current_left_check_car_s="<<sensor_fusion[i][5]<<endl;
 
-                            /*
-                            if((car_s-left_check_car_s) > 30)
-                            {
-                                std::cout<<"lane2-left_lane_change. car_s="<<car_s<<" left_check_car_s="<<left_check_car_s<<endl;
-                                std::cout<<"current_car_s="<<current_car_s<<"current_left_check_car_s="<<sensor_fusion[i][5]<<endl;
-                                lane = 1;
-                                lane_change = true;
-                                break;
-                            } */
-
+                            //Check if there is any vehicle in the path we are planning to take while changing to left lane. Come out of loop if there is any
                             if((sensor_fusion[i][5] >(current_car_s-10) && sensor_fusion[i][5] <(car_s+30))||((abs(car_s - left_check_car_s) < 30)))
                             {
                                 lane_change = false;
