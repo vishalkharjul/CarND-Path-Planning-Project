@@ -67,6 +67,6 @@ A really helpful resource for doing this project and creating smooth trajectorie
 ### Result
 ![Vehicle is able to complete 4.5 miles of tracj without any incident](complete.png)
 
-
+### Final Project Video : https://youtu.be/sXN_eLJW7N0
 
 
